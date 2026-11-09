@@ -200,8 +200,13 @@ data-analysis-agent/
 ├─ Dockerfile
 ├─ docker-compose.yml
 ├─ .env.example
+├─ LICENSE
 └─ README.md
 ```
+
+## 许可证
+
+本项目采用 [MIT License](LICENSE)。可自由使用、修改和分发，保留版权与许可声明即可。
 
 ## API 摘要
 
