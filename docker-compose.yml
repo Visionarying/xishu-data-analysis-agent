@@ -1,0 +1,25 @@
+services:
+  data-analyst:
+    build: .
+    image: data-analysis-agent:latest
+    container_name: data-analysis-agent
+    restart: unless-stopped
+    init: true
+    ports:
+      - "8000:8000"
+    environment:
+      DATA_DIR: /app/data
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-50}
+      MAX_ROWS: ${MAX_ROWS:-200000}
+      MAX_SHEETS: ${MAX_SHEETS:-20}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-40}
+      LLM_MAX_TOKENS: ${LLM_MAX_TOKENS:-1200}
+    volumes:
+      - analyst-data:/app/data
+
+volumes:
+  analyst-data:
+    name: data-analysis-agent-data

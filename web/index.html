@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="析数 · 数据分析 Agent：上传 Excel/CSV，用自然语言完成趋势、异常与对比分析。">
+  <title>析数 · 数据分析 Agent</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="侧边导航">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none"><path d="M7 23.5V17M13 23.5V11M19 23.5V14M25 23.5V7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M5 27h22" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".35"/></svg>
+        </div>
+        <div class="brand-copy">
+          <strong>析数</strong>
+          <span>Data Analyst Agent</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="newAnalysisBtn" type="button">
+        <span class="btn-icon" data-icon="plus"></span>
+        新建分析
+      </button>
+
+      <div class="side-section">
+        <div class="side-heading">
+          数据文件
+          <span class="side-count" id="fileCount">0</span>
+        </div>
+        <div class="side-list" id="fileList">
+          <div class="side-empty">还没有上传文件</div>
+        </div>
+      </div>
+
+      <div class="side-section">
+        <div class="side-heading">
+          我的收藏
+          <button class="side-manage" id="favoritesPanelBtn" type="button">面板</button>
+        </div>
+        <div class="side-list" id="favoriteList">
+          <div class="side-empty">收藏的分析会出现在这里</div>
+        </div>
+      </div>
+
+      <div class="side-section side-history">
+        <div class="side-heading">历史分析</div>
+        <div class="side-list" id="historyList">
+          <div class="side-empty">分析记录会保存在本机</div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="footer-link" id="settingsBtn" type="button">
+          <span data-icon="settings"></span>
+          <span>模型与设置</span>
+        </button>
+        <div class="local-note">
+          <span class="dot dot-green"></span>
+          数据仅保存在本机
+          <span class="version-tag" id="appVersion">v0.10.2</span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <button class="icon-btn mobile-menu" id="menuBtn" type="button" aria-label="打开菜单">
+          <span data-icon="menu"></span>
+        </button>
+        <div class="breadcrumb" id="breadcrumb">
+          <span class="crumb-muted">工作台</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="model-pill" id="modelPill" type="button" title="查看模型配置">
+            <span class="dot dot-amber" id="modelDot"></span>
+            <span id="modelText">检测模型配置…</span>
+          </button>
+          <button class="icon-btn" id="settingsBtnTop" type="button" aria-label="设置">
+            <span data-icon="settings"></span>
+          </button>
+        </div>
+      </header>
+
+      <div class="main-scroll" id="mainScroll">
+        <section class="view" id="landingView">
+          <div class="hero">
+            <div class="eyebrow"><span class="eyebrow-dot"></span>轻量版 MVP · 本地计算 · 真实数据</div>
+            <h1>把表格变成<br><em>可以追问的答案</em></h1>
+            <p class="hero-sub">
+              上传 Excel 或 CSV，用一句自然语言完成趋势、异常与指标对比。
+              查询在本地执行，大模型只负责理解问题与撰写结论。
+            </p>
+            <div class="hero-actions">
+              <button class="btn btn-primary btn-lg" id="heroUploadBtn" type="button">
+                <span data-icon="upload"></span>上传数据开始
+              </button>
+              <a class="btn btn-ghost btn-lg" href="/samples/%E7%A4%BA%E4%BE%8B%E9%94%80%E5%94%AE%E6%95%B0%E6%8D%AE.xlsx" download>
+                <span data-icon="download"></span>下载示例 Excel
+              </a>
+            </div>
+            <div class="hero-points">
+              <span><span data-icon="check"></span>自动识别多工作表</span>
+              <span><span data-icon="check"></span>DuckDB 只读查询</span>
+              <span><span data-icon="check"></span>结论可追溯</span>
+            </div>
+          </div>
+
+          <div class="upload-card" id="dropzone" role="button" tabindex="0" aria-label="上传 Excel 或 CSV 文件">
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" hidden>
+            <div class="upload-card-inner" id="uploadIdle">
+              <div class="upload-icon"><span data-icon="uploadCloud"></span></div>
+              <h2>拖拽文件到这里，或点击选择</h2>
+              <p>支持 .xlsx / .xls / .csv · 单文件不超过 50MB · 多工作表 Excel 会自动拆分</p>
+              <span class="btn btn-secondary">选择文件</span>
+            </div>
+            <div class="upload-progress" id="uploadProgress" hidden>
+              <div class="progress-top">
+                <span class="file-chip"><span data-icon="file"></span><b id="uploadName">file.xlsx</b></span>
+                <span id="uploadPercent">0%</span>
+              </div>
+              <div class="progress-track"><span id="uploadBar"></span></div>
+              <p id="uploadStatus">正在安全上传到本地服务…</p>
+            </div>
+          </div>
+
+          <div class="steps-row">
+            <div class="step-card">
+              <span class="step-no">01</span>
+              <h3>上传与体检</h3>
+              <p>识别表头、字段类型、缺失值与日期范围，先看清数据再分析。</p>
+            </div>
+            <div class="step-card">
+              <span class="step-no">02</span>
+              <h3>用中文提问</h3>
+              <p>“近 12 个月销售额趋势如何？”系统自动映射字段与统计口径。</p>
+            </div>
+            <div class="step-card">
+              <span class="step-no">03</span>
+              <h3>得到可核对结论</h3>
+              <p>图表、关键指标、数据明细与口径一起给出，数字来自真实查询。</p>
+            </div>
+          </div>
+
+          <div class="recent-block" id="recentBlock" hidden>
+            <div class="section-title-row">
+              <h2>最近的数据文件</h2>
+              <span>保存在浏览器会话对应的本地数据库中</span>
+            </div>
+            <div class="recent-grid" id="recentFiles"></div>
+          </div>
+
+          <footer class="landing-footer">
+            <span>所有文件保存在服务端本地 <code>data/uploads</code>，API Key 不会进入浏览器。</span>
+            <button class="text-btn" type="button" id="privacyBtn">隐私与限制</button>
+          </footer>
+        </section>
+
+        <section class="view workspace" id="workspaceView" hidden>
+          <div id="dataOverview"></div>
+          <div class="chat-shell">
+            <div class="chat-heading">
+              <div>
+                <span class="chat-kicker">分析对话</span>
+                <h2>问数据，而不是翻表格</h2>
+              </div>
+              <span class="chat-hint">Enter 发送 · Shift + Enter 换行</span>
+            </div>
+            <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+          </div>
+          <div class="composer-wrap">
+            <div class="suggestion-bar" id="suggestionBar"></div>
+            <div class="composer">
+              <textarea id="questionInput" rows="1" maxlength="500" placeholder="例如：近12个月销售额趋势如何？"></textarea>
+              <button class="send-btn" id="sendBtn" type="button" aria-label="发送问题">
+                <span data-icon="send"></span>
+              </button>
+            </div>
+            <div class="composer-meta">
+              <span>结果由本地数据计算，模型不直接生成数字</span>
+              <span id="aiHint">AI 规则模式</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+  <div class="modal-root" id="modalRoot"></div>
+
+  <script src="/assets/echarts.min.js"></script>
+  <script src="/assets/app.js"></script>
+</body>
+</html>
