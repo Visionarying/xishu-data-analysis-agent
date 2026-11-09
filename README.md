@@ -5,6 +5,8 @@
 前端是 FastAPI 托管的原生 HTML / CSS / JavaScript + 本地 ECharts，无需 Node 构建；历史记录保存在 SQLite，原始文件保存在本机 `data/uploads`。
 
 > 当前版本 `0.10.2`。版本变化见 [CHANGELOG.md](CHANGELOG.md)。
+>
+> 在线仓库（公开，MIT）：<https://github.com/Visionarying/xishu-data-analysis-agent>
 
 ## 功能一览
 
